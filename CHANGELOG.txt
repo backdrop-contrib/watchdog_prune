@@ -1,0 +1,2 @@
+Watchdog Prune - CHANGELOG
+========================

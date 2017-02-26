@@ -1,0 +1,122 @@
+<?php
+/**
+ * @file
+ * This is the main module file for watchdog_prune.
+*/
+
+
+
+/**
+ * Implements hook_menu
+ */
+function watchdog_prune_menu() {
+  $items = array();
+  
+  $items['admin/config/development/watchdog-prune'] = array(
+    'title' => 'Watchdog Prune settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('watchdog_prune_admin_config_form'),
+    'access arguments' => array('administer watchdog_prune'),
+    'type' => MENU_NORMAL_ITEM,    
+  );
+  
+  return $items;
+}
+
+
+
+/**
+ * Implements hook_permission
+ */
+function watchdog_prune_permission() {
+  return array(
+    'administer watchdog_prune' => array(
+      'title' => t('Administer watchdog prune module'),
+    ),
+  );
+}
+
+
+
+function watchdog_prune_admin_config_form() {
+  $form = array();
+  
+  $form['mark_top'] = array(
+    '#markup' => "<p>" . t("This module allows you to delete watchdog entries, on cron run, based on certain criteria (like age).
+                            In order for this module to work, Drupal's built in setting <strong>Database log messages to keep</strong>
+                            must be set to <strong>All</strong>.
+                            <br><br><strong>You must have a correctly configured cron task for this module to work.</strong>") . "</p>",
+  );
+  
+  
+  $form['core_fs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('From Drupal Core'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['core_fs']['dblog_row_limit'] = array(
+    '#type' => 'select',
+    '#title' => t('[From Drupal Core:] Database log messages to keep'),
+    '#options' => array('0' => 'All'),
+    '#default_value' => 0,
+    '#description' => t('For this module to function, we must keep this Drupal Core setting set to <strong>All</strong>.  This setting is provided here
+                          simply as a reminder of where this setting is coming from.'),
+  );
+  
+  
+  $prune_age_options = array(
+    '' => t('None - do not prune based on age'),
+    '-1 MONTH' => t('1 month'),
+    '-2 MONTHS' => t('2 months'),
+    '-3 MONTHS' => t('3 months'),
+    '-6 MONTHS' => t('6 months'),
+    '-9 MONTHS' => t('9 months'),
+    '-12 MONTHS' => t('12 months (1 year)'),
+    '-18 MONTHS' => t('18 months (1.5 years)'),
+    '-24 MONTHS' => t('24 months (2 years)'),
+    '-30 MONTHS' => t('30 months (2.5 years)'),
+    '-36 MONTHS' => t('36 months (3 years)'),
+  );
+  
+  $form['watchdog_prune_age'] = array(
+    '#type' => 'select',
+    '#title' => t('Delete watchdog entries older than:'),
+    '#options' => $prune_age_options,
+    '#default_value' => variable_get('watchdog_prune_age', '-18 MONTHS'),
+    '#description' => t('Watchdog entries older than this time will be deleted on each cron run.'),
+  );
+  
+  
+  // TODO:  Other criteria, like "type".
+  
+  
+  
+  
+  return system_settings_form($form);
+}
+
+
+/**
+ * Implements hook_cron
+ */
+function watchdog_prune_cron() {
+  
+  
+  // Should we delete from the watchdog table based on age?
+  $prune_age = variable_get('watchdog_prune_age', '-18 MONTHS');
+  
+  if ($prune_age != "") {
+    $ts = strtotime($prune_age, time());
+    // Now, simply delete anything from watchdog which is *less than* than our $ts value (meaning, the entry is OLDER than our age limit).
+    db_query("DELETE FROM {watchdog} WHERE `timestamp` < ?", array($ts));      
+  }
+    
+  
+} // hook_cron
+
+
+
+
+
+
