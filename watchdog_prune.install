@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the watchdog_prune module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function watchdog_prune_uninstall() {
+  variable_del('watchdog_prune_age');
+}
