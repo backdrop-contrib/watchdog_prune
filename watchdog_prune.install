@@ -10,4 +10,5 @@
  */
 function watchdog_prune_uninstall() {
   variable_del('watchdog_prune_age');
+  variable_del('watchdog_prune_age_type');
 }

@@ -14,10 +14,11 @@ function watchdog_prune_menu() {
   
   $items['admin/config/development/watchdog-prune'] = array(
     'title' => 'Watchdog Prune settings',
+    'description' => 'This module allows you to delete watchdog entries, on cron run, based on certain criteria (like age or watchdog entry types)',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('watchdog_prune_admin_config_form'),
     'access arguments' => array('administer watchdog_prune'),
-    'type' => MENU_NORMAL_ITEM,    
+    'type' => MENU_NORMAL_ITEM,
   );
   
   return $items;
@@ -36,18 +37,30 @@ function watchdog_prune_permission() {
   );
 }
 
+/**
+ * Implements hook_help()
+ */
+function watchdog_prune_help($path, $arg) {
+  if ($path == 'admin/help#watchdog_prune') {
+    if (current_path() != 'admin/help/watchdog_prune') {
+      return TRUE;
+    }
+    $output = file_get_contents(drupal_get_path('module', 'watchdog_prune') . '/README.txt');
+    $output = '<pre>' . check_plain($output) . '</pre>';
+    return $output;
+  }
+}
 
 
-function watchdog_prune_admin_config_form() {
-  $form = array();
+/**
+ * Function watchdog_prune_admin_config_form
+ */
+function watchdog_prune_admin_config_form($form, &$form_state) {
   
   $form['mark_top'] = array(
-    '#markup' => "<p>" . t("This module allows you to delete watchdog entries, on cron run, based on certain criteria (like age).
-                            In order for this module to work, Drupal's built in setting <strong>Database log messages to keep</strong>
-                            must be set to <strong>All</strong>.
-                            <br><br><strong>You must have a correctly configured cron task for this module to work.</strong>") . "</p>",
+    '#markup' => "<p>" . t("This module allows you to delete watchdog entries, on cron run, based on certain criteria (like age or watchdog entry types).In order for this module to work, Drupal's built in setting <strong>Database log messages to keep</strong>
+      must be set to <strong>All</strong>. <br><br><strong>You must have a correctly configured cron task for this module to work.</strong>") . "</p>",
   );
-  
   
   $form['core_fs'] = array(
     '#type' => 'fieldset',
@@ -55,15 +68,14 @@ function watchdog_prune_admin_config_form() {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
+
   $form['core_fs']['dblog_row_limit'] = array(
     '#type' => 'select',
     '#title' => t('[From Drupal Core:] Database log messages to keep'),
     '#options' => array('0' => 'All'),
     '#default_value' => 0,
-    '#description' => t('For this module to function, we must keep this Drupal Core setting set to <strong>All</strong>.  This setting is provided here
-                          simply as a reminder of where this setting is coming from.'),
+    '#description' => t('For this module to function, we must keep this Drupal Core setting set to <strong>All</strong>.  This setting is provided here simply as a reminder of where this setting is coming from.'),
   );
-  
   
   $prune_age_options = array(
     '' => t('None - do not prune based on age'),
@@ -84,16 +96,57 @@ function watchdog_prune_admin_config_form() {
     '#title' => t('Delete watchdog entries older than:'),
     '#options' => $prune_age_options,
     '#default_value' => variable_get('watchdog_prune_age', '-18 MONTHS'),
-    '#description' => t('Watchdog entries older than this time will be deleted on each cron run.'),
+    '#description' => t('Watchdog entries older than this time will be deleted on each cron run. This will ignore all watchdog types entered in "Delete watchdog entries by type" settings.'),
   );
+
+  $watchdog_types = db_query('SELECT DISTINCT(type) FROM {watchdog}')->fetchCol('type');
+
+  $watchdog_types = implode(", ", $watchdog_types);
+
+  if (count($watchdog_types) == 0) {
+    $watchdog_types = t('Watchdog is empty');
+  }
   
-  
-  // TODO:  Other criteria, like "type".
-  
-  
-  
+  $form['watchdog_prune_age_type'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Delete watchdog entries by type'),
+    '#description' => t('Configure different prune time for each watchdog type, enter separate values on new line. Currently <em>logged</em> watchdog entry types are (<em>' . $watchdog_types . '</em>). For all available values for age check the ' . l(t("PHP Date Manual"), "http://php.net/manual/en/datetime.formats.relative.php", array("attributes" => array("target" => "_blank"))) . '
+      <br><br>Insert values with format
+      <br><b><h4>watchdog_entry_type|age</h4></b>
+      <br>Examples
+      <br><b>php|-1 MONTH</b>
+      <br><b>system|-1 MONTH</b>
+      </br>This will delete all watchdog entries of type php and system which are older than a month on cron run.'),
+    '#rows' => 10,
+    '#cols' => 40,
+    '#default_value' => variable_get('watchdog_prune_age_type', '')
+    );
   
   return system_settings_form($form);
+}
+
+
+/**
+ * Function watchdog_prune_admin_config_form_validate
+ */
+function watchdog_prune_admin_config_form_validate($form, &$form_state) {
+   $prune_type = $form_state['values']['watchdog_prune_age_type'];
+
+   if (!empty($prune_type)) {
+
+    $prune_type = explode("\n", $prune_type);
+
+    if (is_array($prune_type)) {
+      $current_date = strtotime('today');
+      foreach ($prune_type as $key => $value) {
+        $watchdog_prune_settings = explode("|", $value);
+        $user_entered_date = strtotime(trim($watchdog_prune_settings[1]));
+        if ($current_date < $user_entered_date) {
+          form_set_error('watchdog_prune_age_type', t('Incorrect value for <b>' . implode("|", $watchdog_prune_settings) . '</b> Watchdog Prune age must be older than todays date'));
+        }
+      }
+    }
+  }
 }
 
 
@@ -101,22 +154,47 @@ function watchdog_prune_admin_config_form() {
  * Implements hook_cron
  */
 function watchdog_prune_cron() {
+
+  $prune_type = variable_get('watchdog_prune_age_type', '');
+
+  if (!empty($prune_type)) {
   
-  
-  // Should we delete from the watchdog table based on age?
+    $prune_type = explode("\n", $prune_type);
+    $prune_type_list = array();
+
+    if (is_array($prune_type)) {
+      foreach ($prune_type as $key => $value) {
+        $watchdog_prune_settings = explode("|", $value);
+        $prune_query = db_delete('watchdog');
+        //Check if the user has entered the correct squence of settings to prune watchdog messages by type
+        //Starting with the watchdog type
+        if (isset($watchdog_prune_settings[0]) || !empty($watchdog_prune_settings[0])) {
+          $prune_query->condition('type', trim($watchdog_prune_settings[0]), '=');
+          $prune_type_list[] = $watchdog_prune_settings[0];
+          //Check if age is entered as we cannot delete wathdog entries if the age limit entered is incorrect.
+          if (isset($watchdog_prune_settings[1]) || !empty($watchdog_prune_settings[1])) {
+            $ts = strtotime($watchdog_prune_settings[1], time());
+            $prune_query->condition('timestamp', $ts, '<');
+            //Execute the SQL query to Delete.
+            $prune_query->execute();
+          }
+        }
+      }
+    }
+  }
+
+  // Should we delete from the watchdog table based on age?. After deleting all the entries by type let us delete other remaining watchdog entries by excluding the type of entries which were deleted above.
   $prune_age = variable_get('watchdog_prune_age', '-18 MONTHS');
   
   if ($prune_age != "") {
     $ts = strtotime($prune_age, time());
     // Now, simply delete anything from watchdog which is *less than* than our $ts value (meaning, the entry is OLDER than our age limit).
-    db_query("DELETE FROM {watchdog} WHERE `timestamp` < ?", array($ts));      
+    $prune_age = db_delete('watchdog');
+    $prune_age->condition('timestamp', $ts, '<');
+    if (count($prune_type_list) > 0) {
+      $prune_age->condition('type', $prune_type_list, 'NOT IN');
+    }
+    $prune_age->execute();
   }
-    
-  
+
 } // hook_cron
-
-
-
-
-
-
