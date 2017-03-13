@@ -1,6 +1,9 @@
 Watchdog Prune
 ========================
+Original Idea:
 Richard Peacock - richard@peacocksoftware.com
+
+Maintainer:
 Vishwa Chikate - vishwa.chikate@gmail.com
 
 
