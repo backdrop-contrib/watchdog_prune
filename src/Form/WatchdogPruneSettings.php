@@ -56,7 +56,7 @@ class WatchdogPruneSettings extends ConfigFormBase {
       '#description' => $this->t('For this module to function, we must keep this Drupal Core setting set to <strong>All</strong>.  This setting is provided here simply as a reminder of where this setting is coming from.'),
       );
 
-    $prune_age_options = WatchdogPruneSettings::prune_age_options($this);
+    $prune_age_options = WatchdogPruneSettings::prune_age_options();
 
     $form['watchdog_prune_age'] = array(
       '#type' => 'select',
@@ -139,19 +139,19 @@ class WatchdogPruneSettings extends ConfigFormBase {
    * @param $classRef
    * @return An array of Prune age options.
    */
-  protected static function prune_age_options($classRef) {
+  protected static function prune_age_options() {
     $prune_age_options = [
-    '' => $classRef->t('None - do not prune based on age'),
-    '-1 MONTH' => $classRef->t('1 month'),
-    '-2 MONTHS' => $classRef->t('2 months'),
-    '-3 MONTHS' => $classRef->t('3 months'),
-    '-6 MONTHS' => $classRef->t('6 months'),
-    '-9 MONTHS' => $classRef->t('9 months'),
-    '-12 MONTHS' => $classRef->t('12 months (1 year)'),
-    '-18 MONTHS' => $classRef->t('18 months (1.5 years)'),
-    '-24 MONTHS' => $classRef->t('24 months (2 years)'),
-    '-30 MONTHS' => $classRef->t('30 months (2.5 years)'),
-    '-36 MONTHS' => $classRef->t('36 months (3 years)'),
+    '' => t('None - do not prune based on age'),
+    '-1 MONTH' => t('1 month'),
+    '-2 MONTHS' => t('2 months'),
+    '-3 MONTHS' => t('3 months'),
+    '-6 MONTHS' => t('6 months'),
+    '-9 MONTHS' => t('9 months'),
+    '-12 MONTHS' => t('12 months (1 year)'),
+    '-18 MONTHS' => t('18 months (1.5 years)'),
+    '-24 MONTHS' => t('24 months (2 years)'),
+    '-30 MONTHS' => t('30 months (2.5 years)'),
+    '-36 MONTHS' => t('36 months (3 years)'),
     ];
 
     return $prune_age_options;
