@@ -36,6 +36,7 @@ class WatchdogPruneSettings extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
 
     $config = $this->config('watchdog_prune.settings');
+    $database = \Drupal::service('database.replica');
 
     $form['mark_top'] = [
       '#markup' => "<p>" . $this->t("This module allows you to delete watchdog entries, on cron run, based on certain criteria (like age or watchdog entry types).In order for this module to work, Drupal's built in setting <strong>Database log messages to keep</strong>
@@ -67,7 +68,7 @@ class WatchdogPruneSettings extends ConfigFormBase {
       '#description' => $this->t('Watchdog entries older than this time will be deleted on each cron run. This will ignore all watchdog types entered in "Delete watchdog entries by type" settings.'),
     ];
 
-    $watchdog_types = db_query('SELECT DISTINCT(type) FROM {watchdog}')->fetchCol('type');
+    $watchdog_types = $database->query('SELECT DISTINCT(type) FROM {watchdog}')->fetchCol('type');
 
     $watchdog_types = implode(", ", $watchdog_types);
 
@@ -135,7 +136,7 @@ class WatchdogPruneSettings extends ConfigFormBase {
       ->set('watchdog_prune_age', $watchdog_prune_age)
       ->set('watchdog_prune_age_type', $watchdog_prune_age_type)
       ->save();
-    drupal_set_message($this->t('The configuration options have been saved.'), 'status');
+    \Drupal::messenger()->addMessage('The configuration options have been saved.', 'status');
   }
 
   /**
