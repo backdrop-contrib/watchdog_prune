@@ -68,7 +68,7 @@ class WatchdogPruneSettings extends ConfigFormBase {
       '#description' => $this->t('Watchdog entries older than this time will be deleted on each cron run. This will ignore all watchdog types entered in "Delete watchdog entries by type" settings.'),
     ];
 
-    $watchdog_types = $database->query('SELECT DISTINCT(type) FROM {watchdog}')->fetchCol('type');
+    $watchdog_types = $database->query('SELECT DISTINCT(type) FROM {watchdog}')->fetchCol();
 
     if (count($watchdog_types) === 0) {
       $watchdog_types = $this->t('Watchdog is empty');
