@@ -70,10 +70,11 @@ class WatchdogPruneSettings extends ConfigFormBase {
 
     $watchdog_types = $database->query('SELECT DISTINCT(type) FROM {watchdog}')->fetchCol('type');
 
-    $watchdog_types = implode(", ", $watchdog_types);
-
-    if (count($watchdog_types) == 0) {
+    if (count($watchdog_types) === 0) {
       $watchdog_types = $this->t('Watchdog is empty');
+    }
+    else {
+      $watchdog_types = implode(', ', $watchdog_types);
     }
 
     $phpdate_reference = Link::fromTextAndUrl($this->t('PHP Date Manual'), Url::fromUri('http://php.net/manual/en/datetime.formats.relative.php', ['attributes' => ['target' => '_blank']]))->toString();
