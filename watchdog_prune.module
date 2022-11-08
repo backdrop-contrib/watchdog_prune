@@ -12,7 +12,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
  */
 function watchdog_prune_help($route_name, $route_match) {
   if ($route_name == 'help.page.watchdog_prune') {
-    $output = file_get_contents(drupal_get_path('module', 'watchdog_prune') . '/README.txt');
+    $output = file_get_contents(\Drupal::service('extension.list.module')->getPath('watchdog_prune') . '/README.txt');
     $output = '<pre>' . $output . '</pre>';
     return [
       '#type' => 'markup',
