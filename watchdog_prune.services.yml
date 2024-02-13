@@ -1,0 +1,5 @@
+services:
+  watchdog_prune.dblog_route_subscriber:
+    class: Drupal\watchdog_prune\Routing\DbLogRouteSubscriber
+    tags:
+      - { name: event_subscriber }
