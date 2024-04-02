@@ -26,7 +26,7 @@ function watchdog_prune_help($route_name, $route_match) {
  */
 function watchdog_prune_cron() {
   $prune_type = \Drupal::config('watchdog_prune.settings')->get('watchdog_prune_age_type', '');
-  $database = \Drupal::service('database.replica');
+  $database = \Drupal::service('database');
 
   if (!empty($prune_type)) {
 
