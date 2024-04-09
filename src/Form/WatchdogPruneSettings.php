@@ -154,6 +154,7 @@ class WatchdogPruneSettings extends ConfigFormBase {
       '-1 WEEK' => t('1 week'),
       '-2 WEEKS' => t('2 weeks'),
       '-3 WEEKS' => t('3 weeks'),
+      '-27 DAYS' => t('27 days'),
       '-1 MONTH' => t('1 month'),
       '-2 MONTHS' => t('2 months'),
       '-3 MONTHS' => t('3 months'),
