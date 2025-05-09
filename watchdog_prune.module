@@ -200,8 +200,10 @@ function watchdog_prune_cron() {
     // Now, simply delete anything from watchdog which is *less than* than our $ts value (meaning, the entry is OLDER than our age limit).
     $prune_age = db_delete('watchdog');
     $prune_age->condition('timestamp', $ts, '<');
-    if (count($prune_type_list) > 0) {
-      $prune_age->condition('type', $prune_type_list, 'NOT IN');
+    if (is_array($prune_type_list)) {
+      if (count($prune_type_list) > 0) {
+        $prune_age->condition('type', $prune_type_list, 'NOT IN');
+      }
     }
     $prune_age->execute();
   }
