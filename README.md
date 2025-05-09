@@ -21,7 +21,7 @@ Installation
 Current Maintainers
 -------------------
 
-- Richard Peacock (https://github.com/swampopus)
+- [Richard Peacock](https://github.com/swampopus)
 
 
 Credits
@@ -32,9 +32,9 @@ This module is based on the Drupal module watchdog_prune-7.x-1.2
 Project page: https://www.drupal.org/project/watchdog_prune
 
 Drupal Maintainers:
-- Richard Peacock (https://www.drupal.org/u/richardp)
-- Thom Wilhelm (https://www.drupal.org/u/thomwilhelm)
-- Vishwa Chikate (https://www.drupal.org/u/vishwac9)
+- [Richard Peacock](https://www.drupal.org/u/richardp)
+- [Thom Wilhelm](https://www.drupal.org/u/thomwilhelm)
+- [Vishwa Chikate](https://www.drupal.org/u/vishwac9)
 
 
 License
