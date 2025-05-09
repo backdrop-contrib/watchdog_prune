@@ -32,7 +32,7 @@ This module is based on the Drupal module watchdog_prune-7.x-1.2
 Project page: https://www.drupal.org/project/watchdog_prune
 
 Drupal Maintainers:
-- [Richard Peacock](https://www.drupal.org/u/richardp)
+- [Richard Peacock](https://www.drupal.org/u/richardp) - Originally created watchdog_prune for Drupal 7
 - [Thom Wilhelm](https://www.drupal.org/u/thomwilhelm)
 - [Vishwa Chikate](https://www.drupal.org/u/vishwac9)
 
