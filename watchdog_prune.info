@@ -1,4 +1,5 @@
 name = Watchdog Prune
 description = Remove entries from the watchdog table based on age or other factors.
-core = 7.x
+backdrop = 1.x
+type = module
 configure = admin/config/development/watchdog-prune

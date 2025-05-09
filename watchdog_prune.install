@@ -9,6 +9,19 @@
  * Implements hook_uninstall().
  */
 function watchdog_prune_uninstall() {
-  variable_del('watchdog_prune_age');
-  variable_del('watchdog_prune_age_type');
+  config_clear('watchdog_prune.settings', 'watchdog_prune_age');
+  config_clear('watchdog_prune.settings', 'watchdog_prune_age_type');
+}
+
+
+/**
+ * Implements hook_install().
+ */
+function watchdog_prune_install() {
+	
+  $config = config('watchdog_prune.settings');
+  $config->set('watchdog_prune_age', '-18 MONTHS');
+  $config->set('watchdog_prune_age_type', '');
+  $config->save();
+
 }

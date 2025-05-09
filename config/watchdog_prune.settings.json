@@ -1,0 +1,5 @@
+{
+    "_config_name": "watchdog_prune.settings",
+    "watchdog_prune_age": "-18 MONTHS",
+    "watchdog_prune_age_type": ""
+}
