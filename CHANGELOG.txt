@@ -1,6 +1,0 @@
-Watchdog Prune - CHANGELOG
-========================
-
-
-2017-03-07
-  Changing line endings to UNIX.
