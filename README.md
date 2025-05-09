@@ -22,7 +22,7 @@ Current Maintainers
 -------------------
 
 - [Richard Peacock](https://github.com/swampopus)
-- Seeking other maintainers.
+- Seeking additional maintainers.
 
 Credits
 -------
