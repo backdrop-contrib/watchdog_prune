@@ -147,7 +147,7 @@ function watchdog_prune_admin_config_form_validate($form, &$form_state) {
         $temp = explode("|", $value);
         $user_entered_date_ts = strtotime(@trim(@$temp[1]));
         
-        if (time() < $user_entered_date || !$user_entered_date_ts || intval($user_entered_date_ts) === 0) {
+        if (time() < $user_entered_date_ts || !$user_entered_date_ts || intval($user_entered_date_ts) === 0) {
           form_error($form['watchdog_prune_age_type'], t('Incorrect value for <b>' . $value . '</b>.  Age must be older than todays date and formatted correctly: <br>Ex: type | -6 MONTHS'));
         }
       }
@@ -163,11 +163,11 @@ function watchdog_prune_cron() {
   $config = config('watchdog_prune.settings');
 
   $prune_type = trim($config->get('watchdog_prune_age_type'));
-
+  $prune_type_list = array();
+  
   if (!empty($prune_type)) {
 
-    $prune_type = explode("\n", $prune_type);
-    $prune_type_list = array();
+    $prune_type = explode("\n", $prune_type);    
 
     if (is_array($prune_type)) {
       foreach ($prune_type as $value) {
